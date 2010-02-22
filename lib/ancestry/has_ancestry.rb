@@ -10,12 +10,12 @@ module Ancestry
   end
   
   module ClassMethods
-    def acts_as_tree options = {}
+    def has_ancestry options = {}
       # Check options
-      raise AncestryException.new("Options for acts_as_tree must be in a hash.") unless options.is_a? Hash
+      raise AncestryException.new("Options for has_ancestry must be in a hash.") unless options.is_a? Hash
       options.each do |key, value|
         unless [:ancestry_column, :orphan_strategy, :cache_depth, :depth_cache_column].include? key
-          raise AncestryException.new("Unknown option for acts_as_tree: #{key.inspect} => #{value.inspect}.")
+          raise AncestryException.new("Unknown option for has_ancestry: #{key.inspect} => #{value.inspect}.")
         end
       end
       
@@ -424,3 +424,7 @@ module Ancestry
 end
 
 ActiveRecord::Base.send :include, Ancestry
+# Try to use the acts_as_tree method, if it's available.
+if !ActiveRecord::Base.respond_to?(:acts_as_tree)
+  ActiveRecord::Base.class_eval { class << self; alias_method :acts_as_tree, :has_ancestry; end }
+end

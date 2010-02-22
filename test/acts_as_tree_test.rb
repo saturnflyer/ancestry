@@ -1,11 +1,11 @@
 require File.dirname(__FILE__) + '/test_helper.rb'
 
 class TestNode < ActiveRecord::Base
-  acts_as_tree :cache_depth => true, :depth_cache_column => :depth_cache
+  has_ancestry :cache_depth => true, :depth_cache_column => :depth_cache
 end
 
 class AlternativeTestNode < ActiveRecord::Base
-  acts_as_tree :ancestry_column => :alternative_ancestry, :orphan_strategy => :rootify
+  has_ancestry :ancestry_column => :alternative_ancestry, :orphan_strategy => :rootify
 end
 
 class ParentIdTestNode < ActiveRecord::Base
@@ -427,12 +427,12 @@ class ActsAsTreeTest < ActiveSupport::TestCase
     end
   end
   
-  def test_invalid_acts_as_tree_options
+  def test_invalid_has_ancestry_options
     assert_raise Ancestry::AncestryException do
-      Class.new(ActiveRecord::Base).acts_as_tree :this_option_doesnt_exist => 42
+      Class.new(ActiveRecord::Base).has_ancestry :this_option_doesnt_exist => 42
     end
     assert_raise Ancestry::AncestryException do
-      Class.new(ActiveRecord::Base).acts_as_tree :not_a_hash
+      Class.new(ActiveRecord::Base).has_ancestry :not_a_hash
     end
   end
   
@@ -448,7 +448,7 @@ class ActsAsTreeTest < ActiveSupport::TestCase
     # Assert all nodes where created
     assert_equal 156, ParentIdTestNode.count
 
-    ParentIdTestNode.acts_as_tree
+    ParentIdTestNode.has_ancestry
     ParentIdTestNode.build_ancestry_from_parent_ids!
 
     # Assert ancestry integirty
