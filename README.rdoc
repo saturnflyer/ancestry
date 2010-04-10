@@ -25,6 +25,10 @@ To apply Ancestry to any ActiveRecord model, follow these simple steps:
 
 Your model is now a tree!
 
+= Using acts_as_tree instead of has_ancestry
+
+In version 1.2.0 the <b>acts_as_tree</b> method was <b>renamed to has_ancestry</b> in order to allow usage of both the acts_as_tree gem and the ancestry gem in a single application. To not break backwards compatibility, the has_ancestry method is aliased with acts_as_tree if ActiveRecord::Base does not respond to acts_as_tree. acts_as_tree will continue to be supported in the future as I personally prefer it.
+
 = Organising records into a tree
 
 You can use the parent attribute to organise your records into a tree. If you have the id of the record you want to use as a parent and don't want to fetch it, you can also use parent_id. Like any virtual model attributes, parent and parent_id can be set using parent= and parent_id= on a record or by including them in the hash passed to new, create, create!, update_attributes and update_attributes!. For example:
@@ -91,6 +95,7 @@ For convenience, a couple of named scopes are included at the class level:
   ancestors_of(node)      Ancestors of node, node can be either a record or an id
   children_of(node)       Children of node, node can be either a record or an id
   descendants_of(node)    Descendants of node, node can be either a record or an id
+  subtree_of(node)        Subtree of node, node can be either a record or an id
   siblings_of(node)       Siblings of node, node can be either a record or an id
 
 Thanks to some convenient rails magic, it is even possible to create nodes through the children and siblings scopes:
@@ -145,6 +150,10 @@ Ancestry can arrange an entire subtree into nested hashes for easy navigation af
 The arrange method also works on a scoped class, for example:
 
   TreeNode.find_by_name('Crunchy').subtree.arrange
+
+The arrange method takes ActiveRecord find options. If you want your hashes to be ordered, you should pass the order to the arrange method instead of to the scope. This only works for Ruby 1.9 and later since before that hashes weren't ordered. For example:
+
+  TreeNode.find_by_name('Crunchy').subtree.arrange(:order => :name)
 
 = Migrating from plugin that uses parent_id column
 
@@ -218,8 +227,18 @@ The materialised path pattern requires Ancestry to use a 'like' condition in ord
 
 = Version history
 
-The latest and recommended version of ancestry is 1.1.4. The three numbers of each version numbers are respectively the major, minor and patch versions. We started with major version 1 because it looks so much better and ancestry was already quite mature and complete when it was published. The major version is only bumped when backwards compatibility is broken. The minor version is bumped when new features are added. The patch version is bumped when bugs are fixed.
+The latest and recommended version of ancestry is 1.2.0. The three numbers of each version numbers are respectively the major, minor and patch versions. We started with major version 1 because it looks so much better and ancestry was already quite mature and complete when it was published. The major version is only bumped when backwards compatibility is broken. The minor version is bumped when new features are added. The patch version is bumped when bugs are fixed.
 
+- Version 1.2.0 (2009-11-07)
+  - Removed some duplication in has_ancestry
+  - Cleaned up plugin pattern according to http://yehudakatz.com/2009/11/12/better-ruby-idioms/
+  - Moved parts of ancestry into seperate files
+  - Made it possible to pass options into the arrange method
+  - Renamed acts_as_tree to has_ancestry
+  - Aliased has_ancestry as acts_as_tree if acts_as_tree is available
+  - Added subtree_of scope
+  - Updated ordered_by_ancestry scope to support Microsoft SQL Server
+  - Added empty hash as parameter to exists? calls for older ActiveRecord versions
 - Version 1.1.4 (2009-11-07)
   - Thanks to a patch from tom taylor, Ancestry now works with different primary keys
 - Version 1.1.3 (2009-11-01)
@@ -248,7 +267,7 @@ The latest and recommended version of ancestry is 1.1.4. The three numbers of ea
   - has_ancestry checks unknown options
   - has_ancestry checks that options are hash
   - Added a bang (!) to the integrity functions
-    - Since these functions should only be used from ./script/console and not from your appliction, this change is not considered as breaking backwards compatibility and the major version wasn't bumped.
+    - Since these functions should only be used from ./script/console and not from your application, this change is not considered as breaking backwards compatibility and the major version wasn't bumped.
   - Updated install script to point to documentation
   - Removed rails specific init
   - Removed uninstall script
